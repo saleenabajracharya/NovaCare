@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+
+:root {
+  --primary-color: #0a6ebd;
+  --secondary-color: #2e7d32;
+  --button-color: #00838f;
+  --background-color:#f3f5ff ;
+  --background-light: #ffffff;
+  --text-primary: #212121;
+  --text-secondary: #666666;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+input:focus, select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: var(--button-color) !important; 
+}
+
+.PhoneInputInput:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: var(--button-color) !important;
+}
