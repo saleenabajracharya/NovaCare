@@ -7,11 +7,16 @@ import { FaUser } from "react-icons/fa";
 export const NavBar = () => {
   const [showUser,setShowUser] = useState(false);
   const navigate = useNavigate();
+
+  const logout = () => {
+        localStorage.clear('users');  
+        navigate("/sign-in");  
+    }
   return (
     <>
   <nav className="w-full px-4 py-5 fixed top-0 z-50 bg-[var(--background-color)] flex items-center justify-between text-[var(--background-light)]">
     <Link
-      className="text-5xl font-semibold text-[var(--primary-color)] ms-15 flex gap-2"
+      className="text-5xl font-semibold text-[var(--primary-color)] ms-7 flex gap-2"
       to="/"
     >
         <img src="/images/logo.svg" alt="logo" style={{height:"50px", width:"50px"}}/>
@@ -45,7 +50,7 @@ export const NavBar = () => {
           </div>
           <hr className='text-gray-300'/>
           <div
-            className=" py-2 hover:bg-gray-100 cursor-pointer text-[var( --text-primary)]"
+            className=" py-2 hover:bg-gray-100 cursor-pointer text-[var( --text-primary)]" onClick={logout}
           >
             Logout
           </div>
