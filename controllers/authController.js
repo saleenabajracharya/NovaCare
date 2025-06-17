@@ -3,14 +3,16 @@ const jwt = require('jsonwebtoken');
 const { findUserByEmail, createUser } = require('../models/userModel');
 
 exports.register = async (req, res) => {
-  const { fullName, email, password, role, specialist } = req.body;
+  const { fullName, email,phone, password, role, specialist } = req.body;
 
   try {
     const existingUser = await findUserByEmail(email);
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await createUser(fullName, email, hashedPassword, role, specialist);
+    console.log("Hashed password:", hashedPassword);
+
+    await createUser(fullName, email,phone, hashedPassword, role, specialist);
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
@@ -33,7 +35,7 @@ exports.login = async (req, res) => {
       expiresIn: process.env.JWT_EXPIRATION
     });
 
-    res.status(200).json({ user: { id: user.id, fullName: user.fullName, email: user.email }, token });
+    res.status(200).json({ user: { id: user.UserId, fullName: user.fullname, email: user.email, role:user.role }, token });
   } catch (err) {
 
     res.status(500).json({ message: 'Database error' });

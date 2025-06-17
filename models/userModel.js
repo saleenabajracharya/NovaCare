@@ -5,10 +5,10 @@ const findUserByEmail = async (email) => {
   return result.rows[0];
 };
 
-const createUser = async (fullName, email, hashedPassword, role, specialist) => {
+const createUser = async (fullName, email,phone, hashedPassword, role, specialist) => {
   await db.query(
-    'INSERT INTO users (fullName, email, password, role, specialist, "createdDate") VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)',
-    [fullName, email, hashedPassword, role, specialist]
+    'INSERT INTO users (fullName, email, phone, password, role, specialist, "created_Date") VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)',
+    [fullName, email, phone, hashedPassword, role, specialist]
   );
 };
 
