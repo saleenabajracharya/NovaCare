@@ -1,39 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Layout } from "../layout/Layout";
 import { FaCaretDown, FaCaretUp  } from "react-icons/fa";
-
-const patientHistories = [
-  {
-    patientId: 1,
-    patientName: "Salina Bajracharya",
-    phoneNumber: 9863034062,
-    age: 25,
-    gender: "female",
-    address: "Naikap",
-    date: "2025-04-01",
-    doctor: "Dr. Smith",
-    reason: "",
-    symptoms: "Fever, Cough",
-    diagnosis: "Flu",
-    prescription: "Paracetamol, Rest",
-  },
-  {
-    patientId: 2,
-    patientName: "Rohan Manandhar",
-    phoneNumber: 9845748362,
-    age: 24,
-    gender: "male",
-    date: "2025-03-15",
-    doctor: "Dr. Brown",
-    symptoms: "Headache",
-    diagnosis: "Migraine",
-    prescription: "Ibuprofen",
-  },
-];
 
 const PatientHistory = () => {
     debugger;
   const [openId, setOpenId] = useState(null);
+  const [patientRecord, setPatientRecord] = useState([]);
+
+   useEffect(() => {
+    const fetchPatientHistory = async () => {
+    try {
+      setTimeout(async () => {
+        const res = await fetch(`http://localhost:5000/record/patients`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetching patient history");
+        }
+
+        const resData = await res.json();
+        setPatientRecord(resData);
+      }, 200);
+    } catch (error) {
+      console.error("Error fetching patients data:", error);
+        setPatientRecord(resData);
+    } finally {
+    }
+  };
+    fetchPatientHistory();
+  }, []);
 
   const toggleDetails = (patientId) => {
     setOpenId(openId === patientId ? null : patientId);
@@ -43,21 +42,21 @@ const PatientHistory = () => {
     <Layout>
     <div className="min-h-[calc(100vh-140px)] w-4/5 mx-auto rounded-xl p-5 bg-white py-5 ">
       <h2 className="text-2xl text-center font-bold text-[var(--text-primary)] mb-6 mt-5">Patient History</h2>
-      {patientHistories.map((entry) => (
+      {patientRecord.map((entry) => (
         <div
-        key={entry.patientId}
+        key={entry.FormId}
           className="border rounded-md mb-4 shadow-sm transition-all"
         >
           <div
-            onClick={() => toggleDetails(entry.patientId)}
+            onClick={() => toggleDetails(entry.patientid)}
             className="p-4 cursor-pointer bg-[var(--background-color)] hover:bg-blue-100 flex justify-between items-center"
           >
-            <span className="font-medium">{entry.date} - {entry.patientName} - {entry.phoneNumber}</span>
-            <span className="text-[var(--primary-color)]">{openId === entry.patientId ? <FaCaretUp size={26} />
+            <span className="font-medium">{entry.date ? entry.date.slice(0, 10) : "N/A"} - {entry.patientname} - {entry.phone}</span>
+            <span className="text-[var(--primary-color)]">{openId === entry.patientid ? <FaCaretUp size={26} />
   : <FaCaretDown size={26}/>}</span>
           </div>
 
-          {openId === entry.patientId && (
+          {openId === entry.patientid && (
             <div className="p-4 bg-gray-50" >
               <div className="flex space-x-4 space-y-3">
               <div className="w-1/2">
@@ -65,7 +64,7 @@ const PatientHistory = () => {
                 <input
                   type="text"
                   disabled
-                  value={entry.patientId}
+                  value={entry.patientid}
                   readOnly
                   className="w-full border p-2 rounded bg-gray-100"
                 />
@@ -74,7 +73,7 @@ const PatientHistory = () => {
                 <label className="font-medium   block">Patient Name:</label>
                 <input
                   type="text"
-                  value={entry.patientName}
+                  value={entry.patientname}
                   disabled
                   className="w-full border p-2 rounded bg-gray-100"
                 />
@@ -86,7 +85,7 @@ const PatientHistory = () => {
           <select
             className="mt-1 w-full border rounded-md p-2 bg-white"
             disabled
-            value={entry.gender}
+            value={entry.gender?.toLowerCase() || ""}
             >
             <option value="">Select Gender</option>
             <option value="male">Male</option>
@@ -120,7 +119,7 @@ const PatientHistory = () => {
           <label className="block text-sm font-medium text-[var(--text-primary)]">Contact Number:</label>
           <input
             type="text"
-            value={entry.phoneNumber}
+            value={entry.phone}
             disabled
             className="mt-1 w-full border rounded-md p-2 hover:border-black"
           />
@@ -131,7 +130,7 @@ const PatientHistory = () => {
           <label className="block text-sm font-medium text-[var(--text-primary)]">Doctor Name</label>
           <input
             type="text"
-            value={entry.doctor}
+            value={entry.doctor_name}
             disabled
             className="mt-1 w-full border rounded-md p-2"
           />
@@ -140,7 +139,7 @@ const PatientHistory = () => {
           <label className="block text-sm font-medium text-[var(--text-primary)]">Reason for visit:</label>
           <input
             type="text"
-            value={entry.reason}
+            value={entry.department}
             disabled
             className="mt-1 w-full border rounded-md p-2"
           />
@@ -148,7 +147,7 @@ const PatientHistory = () => {
       </div>
       <div className="flex space-x-4 space-y-3">
         <div className="w-1/2">
-          <label className="block text-sm font-medium text-[var(--text-primary)]">Appointment Time:</label>
+          <label className="block text-sm font-medium text-[var(--text-primary)]">Appointment date:</label>
           <input
             type="text"
             value={entry.date}
@@ -169,7 +168,7 @@ const PatientHistory = () => {
       <div>
         <label className="block text-sm font-medium text-[var(--text-primary)]">Doctor's suggestion </label>
         <textarea
-        value={entry.prescription}
+        value={entry.symptoms}
         disabled
           className="mt-1 w-full border rounded-md p-2"
         />

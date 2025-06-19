@@ -23,6 +23,7 @@ const PatientForm = () => {
 
   const user = JSON.parse(localStorage.getItem('user:detail') || '{}');
   const isDoc = user?.role === "doctor";
+  const email = user.email || "User";
 
 
 
@@ -125,6 +126,7 @@ const PatientForm = () => {
   const onSubmit = async (data) => {
     const token = localStorage.getItem('user:token');
     try {
+      const updatedData = { ...data, email: email };
       const res = await
        fetch(
         `http://localhost:5000/record/patient`,
@@ -134,8 +136,7 @@ const PatientForm = () => {
             "Content-Type": "application/json",
 
           },
-          body: JSON.stringify(data),
-        }
+      body: JSON.stringify(updatedData),        }
       );
   
       const resText = await res.text();
@@ -287,13 +288,12 @@ const PatientForm = () => {
                 <option>Pediatrics</option>
                 <option>Orthopedics</option>
                 <option>Cardiologist</option>
-                <option>Dermatology</option>
                 <option>Dermatologist</option>
                 <option>ENT</option>
-                <option>Gynecology</option>
-                <option>Opthamology</option>
-                <option>Hepatology</option>
-                <option>Nephrology</option>
+                <option>Gynecologist</option>
+                <option>Opthalmologist</option>
+                <option>Hepatologist</option>
+                <option>Nephrologist</option>
               </select>
                             {errors.reason && <p className="text-red-500 text-sm">{errors.reason.message}</p>}
             </div>
@@ -337,10 +337,15 @@ const PatientForm = () => {
             {...register("doctorId")}
             value={doctorId}
             readOnly
+            hidden
             className="mt-1 w-full border rounded-md p-2 text-sm text-black bg-gray-100"
           />
 
+          {isDoc && (<div><label className="block text-sm font-medium text-[var(--text-primary)]">Doctor's suggestion </label>
+        <textarea type="datetime-local" {...register("suggestion")} className="mt-1 w-full border rounded-md p-2"/>
 
+
+      </div>)}
 
 
 

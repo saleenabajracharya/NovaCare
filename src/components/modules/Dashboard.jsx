@@ -3,7 +3,8 @@ import { FaFilePen } from "react-icons/fa6";
 import { FaHistory } from "react-icons/fa";
 import { useNavigate } from 'react-router';
 import { Layout } from '../layout/Layout'
-export const Dashboard = () => {
+
+const Dashboard = () => {
 
   const user = JSON.parse(localStorage.getItem('user:detail') || '{}');
   const isDoc = user?.role === "doctor";
@@ -23,15 +24,16 @@ export const Dashboard = () => {
         </div>
         <div className='flex mx-12'>
           <div className='h-30 w-25 bg-[var(--background-color)] rounded-lg m-4 border border-gray-300 cursor-pointer transition-all duration-300 hover:border-gray-400 hover:shadow-2xl'>
-            <div className='flex justify-center items-center py-8 text-[var(--primary-color)] ' onClick={() => navigate('/new-form')}>
-              <FaFilePen size={50} />
+            <div className='flex justify-center items-center py-8 text-[var(--primary-color)] ' onClick={isDoc ? () => navigate('/todays-list') : () => navigate('/new-form')}
+            >
+              <FaFilePen size={50} aria-label="New Form"/>
             </div>
             <p className='text-center my-2  text-sm'>{isDoc ? "Today's List" : "New Form"}</p>
           </div>
 
           <div className='h-30 w-25 bg-[var(--background-color)] rounded-lg m-4 border border-gray-300 cursor-pointer transition-all duration-300 hover:border-gray-400 hover:shadow-2xl'>
             <div className='flex justify-center items-center py-8 text-[var(--primary-color)] ' onClick={() => navigate('/patient-history')}>
-              <FaHistory size={50} />
+              <FaHistory size={50} aria-label="Patient History"/>
             </div>
             <p className='text-center my-2 text-sm whitespace-nowrap '>Patient History</p>
           </div>
@@ -43,3 +45,4 @@ export const Dashboard = () => {
     </Layout>
   )
 }
+export default Dashboard

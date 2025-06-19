@@ -2,14 +2,16 @@ import { Routes, Route, Navigate, BrowserRouter } from 'react-router-dom';
 import './App.css'
 import Form from './components/modules/Form'
 import { NoPage } from './components/modules/NoPage';
-import { Dashboard } from './components/modules/Dashboard';
 import { NavBar } from './components/navbar/NavBar';
 import { Profile } from './components/modules/Profile';
 import PatientForm from './components/modules/PatientForm';
-import PatientHistory from './components/modules/patientHistory';
 import PrescribedMeds from './components/modules/PrescribedMeds';
-import { useNavigate } from 'react-router-dom';
 import React, { useEffect } from "react";
+import { lazy, Suspense } from 'react';
+const PatientHistory = lazy(() => import('./components/modules/patientHistory'));
+const TodaysList = lazy(() => import('./components/modules/TodaysList'));
+const Dashboard = lazy(() => import('./components/modules/Dashboard'))
+
 
 function parseJwt(token) {
   if (!token) return null;
@@ -39,7 +41,7 @@ function isTokenExpired(token) {
 
 function App() {
   function logout() {
-    localStorage.clear('users');  
+    localStorage.clear('users');
     return <Navigate to={'/sign-in'} />;
   }
   useEffect(() => {
@@ -48,7 +50,7 @@ function App() {
       logout();
       return;
     }
-    
+
     const payload = parseJwt(token);
     const timeLeft = (payload.exp * 1000) - Date.now();
 
@@ -72,63 +74,80 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path='/*'
-          element={
-            <NoPage />
-          }
-        />
-        <Route
-          path='/profile'
-          element={
-            <Profile />
-          }
-        />
-        <Route
-          path='/sign-in'
-          element={
-            <ProtectedRoutes>
-              <Form key="sign-in" isSignInPage={true} />
-            </ProtectedRoutes>
-          }
-        />
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path='/*'
+            element={
+              <NoPage />
+            }
+          />
+          <Route
+            path='/profile'
+            element={
+              <Profile />
+            }
+          />
+          <Route
+            path='/sign-in'
+            element={
+              <ProtectedRoutes>
+                <Form key="sign-in" isSignInPage={true} />
+              </ProtectedRoutes>
+            }
+          />
 
-        <Route
-          path='/sign-up'
-          element={
-            <ProtectedRoutes>
-              <Form key="sign-up" isSignInPage={false} />
-            </ProtectedRoutes>
-          }
-        />
+          <Route
+            path='/sign-up'
+            element={
+              <ProtectedRoutes>
+                <Form key="sign-up" isSignInPage={false} />
+              </ProtectedRoutes>
+            }
+          />
 
+          <Route
+            path='/'
+            element={
+              <ProtectedRoutes auth={true}>
+                <Suspense fallback={
+                  <div className="flex items-center justify-center h-screen text-xl font-semibold text-[var(--primary-color)]">
+                    Loading...
+                  </div>}>
+                  <Dashboard />
+                </Suspense>
 
-        {/* Home/Dashboard route (requires authentication) */}
-        <Route
-          path='/'
-          element={
-            <ProtectedRoutes auth={true}>
-              <Dashboard />
-            </ProtectedRoutes>
-          }
-        />
+              </ProtectedRoutes>
+            }
+          />
+          <Route path='/todays-list' element={
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-screen text-xl font-semibold text-[var(--primary-color)]">
+                Loading...
+              </div>}>
+              <TodaysList />
+            </Suspense>
+          } />
 
-        <Route
-          path='/new-form'
-          element={
-            <PatientForm />
-          }
-        />
-        <Route
-          path='/patient-history'
-          element={
-            <PatientHistory />
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+          <Route
+            path='/new-form'
+            element={
+              <PatientForm />
+            }
+          />
+          <Route
+            path='/patient-history'
+            element={
+              <Suspense fallback={
+                <div className="flex items-center justify-center h-screen text-xl font-semibold text-[var(--primary-color)]">
+                  Loading...
+                </div>}>
+                <PatientHistory />
+              </Suspense>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
   )
 }
 

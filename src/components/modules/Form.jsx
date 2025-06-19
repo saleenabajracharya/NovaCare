@@ -156,12 +156,23 @@ const onSubmit = async (data) => {
           <label className="block text-[var(--text-primary)] mb-2">
             Specialist
           </label>
-          <input
-            type="text"
-            {...register("specialist", { required: true })}
-            placeholder="e.g., Cardiologist"
-            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 bg-blue-50"
-          />
+          <select
+                {...register("specialist", { required: "Specialist is required" })}
+      
+                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 bg-blue-50"
+              >
+                <option value="">Select a department</option>
+                <option>General Medicine</option>
+                <option>Pediatrics</option>
+                <option>Orthopedics</option>
+                <option>Cardiologist</option>
+                <option>Dermatologist</option>
+                <option>ENT</option>
+                <option>Gynecologist</option>
+                <option>Opthalmologist</option>
+                <option>Hepatologist</option>
+                <option>Nephrologist</option>
+              </select>
           {errors.specialist && (
             <p className="text-red-500 text-sm mt-1">Specialist is required.</p>
           )}
@@ -230,7 +241,7 @@ const onSubmit = async (data) => {
           </div>
         </div>
       </div>
-      <ToastContainer position="top-center" autoClose={3000} />
+      <ToastContainer position="top-center" autoClose={1500} />
     </div>
   );
 };
