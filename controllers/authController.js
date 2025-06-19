@@ -10,7 +10,6 @@ exports.register = async (req, res) => {
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("Hashed password:", hashedPassword);
 
     await createUser(fullName, email,phone, hashedPassword, role, specialist);
 
@@ -35,7 +34,7 @@ exports.login = async (req, res) => {
       expiresIn: process.env.JWT_EXPIRATION
     });
 
-    res.status(200).json({ user: { id: user.UserId, fullName: user.fullname, email: user.email, role:user.role }, token });
+    res.status(200).json({ user: { id: user.UserId, fullName: user.fullname, email: user.email, role:user.role, department:user.department }, token });
   } catch (err) {
 
     res.status(500).json({ message: 'Database error' });

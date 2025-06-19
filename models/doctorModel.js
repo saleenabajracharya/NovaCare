@@ -2,7 +2,7 @@ const db = require('../config/db')
 
 const findDoctorByDepartment = async (department) => {
   const result = await db.query(
-    'SELECT fullname FROM users WHERE role = $1 AND specialist = $2',
+    'SELECT fullname FROM users WHERE role = $1 AND department = $2',
     ['doctor', department]
   );
   return result.rows;

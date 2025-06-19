@@ -12,7 +12,7 @@ app.use(cors());
 // Import routes
 const authRoutes = require('./routes/authRoute');
 const patientRecordRoutes = require('./routes/patientRecordRoute');
-const doctorsRoutes = require('./routes/doctorRoute')
+const doctorsRoutes = require('./routes/doctorRoute');
 const authenticate = require('./middlewares/authMiddleware');
 
 app.use('/data', doctorsRoutes);
