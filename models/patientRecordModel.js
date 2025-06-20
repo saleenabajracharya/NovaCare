@@ -7,6 +7,61 @@ const addPatientRecord = async (patientId, patientName,gender, age, address, pho
   );
 };
 
+const updatePatientRecord = async (
+  formId,
+  patientId,
+  patientName,
+  gender,
+  age,
+  address,
+  phone,
+  doctorId,
+  doctorName,
+  symptoms,
+  reason,
+  date,
+  email,
+  description
+) => {
+  await db.query(
+    `UPDATE PatientRecord
+     SET 
+       patientId = $1,
+       patientName = $2,
+       gender = $3,
+       age = $4,
+       address = $5,
+       phone = $6,
+       doctor_id = $7,
+       doctor_name = $8,
+       symptoms = $9,
+       department = $10,
+       date = $11,
+       email = $12,
+       description = $13,
+       "modified_Date" = CURRENT_TIMESTAMP
+     WHERE "FormId" = $14 AND "deleted_Date" IS NULL`,
+    [
+      patientId,
+      patientName,
+      gender,
+      age,
+      address,
+      phone,
+      doctorId,
+      doctorName,
+      symptoms,
+      reason,
+      date,
+      email,
+      description,
+      formId
+    ]
+  );
+};
+
+
+
 const getPatientRecord = async () =>{
   const result = await db.query('SELECT * FROM PatientRecord WHERE "deleted_Date" IS NULL order by "created_Date" DESC');
   return result.rows;
@@ -22,5 +77,5 @@ const getSinglePatientRecord = async (FormId) =>{
   return result.rows[0];
 }
 module.exports = {
-  addPatientRecord, getPatientRecord, todaysPatientRecord, getSinglePatientRecord
+  addPatientRecord, getPatientRecord, todaysPatientRecord, getSinglePatientRecord, updatePatientRecord
 };

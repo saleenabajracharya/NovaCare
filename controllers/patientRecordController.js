@@ -1,4 +1,52 @@
-const { addPatientRecord, getPatientRecord, todaysPatientRecord , getSinglePatientRecord} = require('../models/patientRecordModel');
+const { addPatientRecord, getPatientRecord, todaysPatientRecord , getSinglePatientRecord, updatePatientRecord} = require('../models/patientRecordModel');
+
+const updatePatient = async (req, res) => {
+  const FormId = parseInt(req.params.FormId, 10);
+
+  if (isNaN(FormId)) {
+    return res.status(400).json({ message: "Invalid Form ID" });
+  }
+
+  const {
+    patientId,
+    patientName,
+    gender,
+    age,
+    address,
+    phone,
+    doctorId,
+    doctorName,
+    symptoms,
+    reason, 
+    date,
+    email, 
+    description
+  } = req.body;
+
+  try {
+    await updatePatientRecord(
+      FormId,
+      patientId,
+      patientName,
+      gender,
+      age,
+      address,
+      phone,
+      doctorId,
+      doctorName,
+      symptoms,
+      reason,
+      date,
+      email, 
+      description
+    );
+
+    res.status(200).json({ message: "Patient record updated successfully" });
+  } catch (error) {
+    console.error("Error updating patient record:", error);
+    res.status(500).json({ message: "Failed to update patient record" });
+  }
+};
 
 const registerPatient = async (req, res) => {
   try {
@@ -63,5 +111,5 @@ const getSinglePatient = async (req, res) =>{
 
 
 module.exports = {
-  registerPatient, getPatientData, todaysPatientData, getSinglePatient
+  registerPatient, getPatientData, todaysPatientData, getSinglePatient, updatePatient
 };
