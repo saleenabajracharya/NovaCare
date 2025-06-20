@@ -130,7 +130,7 @@ function App() {
           } />
 
           <Route
-            path='/new-form'
+            path='/form'
             element={
               <PatientForm />
             }
@@ -146,6 +146,7 @@ function App() {
               </Suspense>
             }
           />
+          <Route path="/form/:FormId" element={<PatientForm />} />
         </Routes>
       </BrowserRouter>
   )

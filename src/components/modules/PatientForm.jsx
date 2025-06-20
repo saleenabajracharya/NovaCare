@@ -5,6 +5,8 @@ import 'react-phone-number-input/style.css';
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { toast, ToastContainer} from "react-toastify";
+import { useParams } from "react-router";
+
 
 const PatientForm = () => {
   const {
@@ -20,10 +22,12 @@ const PatientForm = () => {
   const [patientId, setPatientId] = useState("");
   const [doctors, setDoctors] = useState([]);
   const [doctorId, setDoctorId] = useState("");
-
+  
   const user = JSON.parse(localStorage.getItem('user:detail') || '{}');
   const isDoc = user?.role === "doctor";
   const email = user.email || "User";
+  const { FormId } = useParams();
+
 
 
 
@@ -36,6 +40,56 @@ const PatientForm = () => {
     const today = new Date().toISOString().split('T')[0];
     setValue("date", today);
   }, [setValue]);
+
+ useEffect(() => {
+  if (FormId) {
+    const fetchPatientData = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/record/patient/${FormId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch patient data");
+
+        const data = await res.json();
+        const mappedData = {
+          patientId: data.patientid,
+          patientName: data.patientname,
+          gender: data.gender,
+          age: data.age,
+          address: data.address,
+          phone: data.phone,
+          doctorId: data.doctor_id,
+          reason: data.department,
+          symptoms: data.symptoms,
+          date: data.date?.split("T")[0], 
+          doctorName: data.doctor_name,
+          email: data.email,
+        };
+
+        Object.entries(mappedData).forEach(([key, value]) => {
+          if (value !== null && value !== undefined) {
+            setValue(key, value);
+          }
+        });
+
+        setDoctorId(data.doctor_id); 
+        if (data.department) {
+          await handleDepartmentChange({ target: { value: data.department } });
+        }
+
+      } catch (err) {
+        console.error("Error fetching patient by ID:", err);
+      }
+    };
+
+    fetchPatientData();
+  }
+}, [FormId, setValue]);
+
 
 
   const newPatient = () => {
@@ -124,38 +178,42 @@ const PatientForm = () => {
   };
 
   const onSubmit = async (data) => {
-    const token = localStorage.getItem('user:token');
-    try {
-      const updatedData = { ...data, email: email };
-      const res = await
-       fetch(
-        `http://localhost:5000/record/patient`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+  const token = localStorage.getItem('user:token');
+  const updatedData = { ...data, email: email };
 
-          },
-      body: JSON.stringify(updatedData),        }
-      );
-  
-      const resText = await res.text();
-      const resData = resText ? JSON.parse(resText) : {};
-  
-      if (res.status === 400) {
-        toast.error("Invalid Credentials");
-      } else if ( res.status === 201 || res.status === 204) {
-        toast.success("Patient Record Added!");
-        reset();
-        navigate("/new-form");
-      } else {
-        toast.error(resData.message || "Unexpected server response");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("An error occurred");
+  try {
+    const url = FormId
+      ? `http://localhost:5000/record/patient/${FormId}` 
+      : `http://localhost:5000/record/patient`;          
+
+    const method = FormId ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedData),
+    });
+
+    const resText = await res.text();
+    const resData = resText ? JSON.parse(resText) : {};
+
+    if (res.status === 400) {
+      toast.error("Invalid input");
+    } else if (res.status === 201 || res.status === 204 || res.status === 200) {
+      toast.success(FormId ? "Patient Record Updated!" : "Patient Record Added!");
+      reset();
+      navigate("/form");
+    } else {
+      toast.error(resData.message || "Unexpected server response");
     }
-  };
+  } catch (error) {
+    console.error("Error:", error);
+    toast.error("An error occurred");
+  }
+};
+
   
 
 
@@ -342,7 +400,7 @@ const PatientForm = () => {
           />
 
           {isDoc && (<div><label className="block text-sm font-medium text-[var(--text-primary)]">Doctor's suggestion </label>
-        <textarea type="datetime-local" {...register("suggestion")} className="mt-1 w-full border rounded-md p-2"/>
+        <textarea type="datetime-local" {...register("description")} className="mt-1 w-full border rounded-md p-2"/>
 
 
       </div>)}

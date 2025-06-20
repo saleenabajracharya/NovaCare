@@ -46,7 +46,7 @@ const TodaysList = () => {
                         className="border rounded-md mb-4 shadow-sm transition-all"
                     >
                         <div
-                            onClick={() => navigate('/new-form')}
+                            onClick={() => navigate(`/form/${entry.FormId}`)}
                             className="p-4 cursor-pointer bg-[var(--background-color)] hover:bg-blue-100 flex justify-between items-center"
                         >
                             <span className="font-medium">{entry.date ? entry.date.slice(0, 10) : "N/A"} - {entry.patientname} - {entry.phone}</span>
