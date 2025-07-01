@@ -132,7 +132,7 @@ function App() {
           <Route
             path='/form'
             element={
-              <PatientForm />
+              <PatientForm key={Date.now()} />
             }
           />
           <Route

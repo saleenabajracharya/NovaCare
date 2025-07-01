@@ -4,10 +4,11 @@ import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { toast, ToastContainer} from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { useParams } from "react-router";
-
-
+import { useLocation } from "react-router-dom";
+import PrescribedMeds from "./PrescribedMeds";
+const getToday = () => new Date().toISOString().split("T")[0];
 const PatientForm = () => {
   const {
     register,
@@ -20,9 +21,15 @@ const PatientForm = () => {
 
   const navigate = useNavigate();
   const [patientId, setPatientId] = useState("");
+  const location = useLocation();
   const [doctors, setDoctors] = useState([]);
   const [doctorId, setDoctorId] = useState("");
-  
+  const [medRecord, setMedRecord] = useState([]);
+  const [meds, setMeds] = useState([
+    { medicineName: '', medicineType: '', price: '', quantity: '', totalPrice: '' }
+  ]);
+
+
   const user = JSON.parse(localStorage.getItem('user:detail') || '{}');
   const isDoc = user?.role === "doctor";
   const email = user.email || "User";
@@ -37,58 +44,79 @@ const PatientForm = () => {
   };
 
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    setValue("date", today);
-  }, [setValue]);
+    if (!FormId && location.pathname === "/form") {
+      reset({ date: getToday() });
+    }
+  }, [location.pathname, reset, FormId]);
 
- useEffect(() => {
-  if (FormId) {
-    const fetchPatientData = async () => {
-      try {
-        const res = await fetch(`http://localhost:5000/record/patient/${FormId}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
 
-        if (!res.ok) throw new Error("Failed to fetch patient data");
+  useEffect(() => {
+    if (FormId) {
+      const fetchPatientData = async () => {
+        try {
+          const res = await fetch(`http://localhost:5000/record/patient/${FormId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
 
-        const data = await res.json();
-        const mappedData = {
-          patientId: data.patientid,
-          patientName: data.patientname,
-          gender: data.gender,
-          age: data.age,
-          address: data.address,
-          phone: data.phone,
-          doctorId: data.doctor_id,
-          reason: data.department,
-          symptoms: data.symptoms,
-          date: data.date?.split("T")[0], 
-          doctorName: data.doctor_name,
-          email: data.email,
-        };
+          if (!res.ok) throw new Error("Failed to fetch patient data");
+          debugger;
+          const data = await res.json();
+          const mappedData = {
+            patientId: data.patientid,
+            patientName: data.patientname,
+            gender: data.gender,
+            age: data.age,
+            address: data.address,
+            phone: data.phone,
+            doctorId: data.doctor_id,
+            reason: data.department,
+            symptoms: data.symptoms,
+            date: data.date?.split("T")[0],
+            email: data.email,
+          };
 
-        Object.entries(mappedData).forEach(([key, value]) => {
-          if (value !== null && value !== undefined) {
-            setValue(key, value);
+          Object.entries(mappedData).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) {
+              setValue(key, value);
+            }
+          });
+
+          setDoctorId(data.doctor_id);
+          if (data.department) {
+            await handleDepartmentChange({ target: { value: data.department } });
           }
-        });
 
-        setDoctorId(data.doctor_id); 
-        if (data.department) {
-          await handleDepartmentChange({ target: { value: data.department } });
+          if (data.doctor_name) {
+            setTimeout(() => {
+              setValue("doctorName", data.doctor_name);
+            }, 50);
+          }
+          if (data.prescribedmeds && Array.isArray(data.prescribedmeds)) {
+            const medRows = data.prescribedmeds.map(med => ({
+              id: med.id,
+              medicineName: med.medicineName || '',
+              medicineType: med.medicineType || '',
+              price: med.price !== null ? med.price.toString() : '',
+              quantity: med.quantity !== null ? med.quantity.toString() : '',
+              totalPrice: med.totalPrice !== null ? med.totalPrice.toString() : '',
+            }));
+
+            setMeds(medRows);
+          } else {
+            setMeds([]);
+          }
+
+        } catch (err) {
+          console.error("Error fetching patient by ID:", err);
         }
+      };
 
-      } catch (err) {
-        console.error("Error fetching patient by ID:", err);
-      }
-    };
-
-    fetchPatientData();
-  }
-}, [FormId, setValue]);
+      fetchPatientData();
+    }
+  }, [FormId, setValue]);
 
 
 
@@ -101,12 +129,12 @@ const PatientForm = () => {
     setValue("patientId", generatedId);
   }
 
-   const phoneValue = watch("phone");
-    
-  
-   useEffect(() => {
+  const phoneValue = watch("phone");
 
-      register("phone", { required: "Phone number is required" });
+
+  useEffect(() => {
+
+    register("phone", { required: "Phone number is required" });
   }, [register]);
 
   const handleDepartmentChange = async (e) => {
@@ -163,12 +191,13 @@ const PatientForm = () => {
 
       if (data) {
         setDoctorId(data.UserId);
-       setValue("doctorId", data.UserId);   
-    } else {
-      console.error("error", data);
-      setDoctorId("");
-      setValue("doctorId", "");
-    }
+        setValue("doctorId", data.UserId);
+
+      } else {
+        console.error("error", data);
+        setDoctorId("");
+        setValue("doctorId", "");
+      }
     } catch (error) {
       console.error("Error fetching doctors:", error);
       toast.error("An error occurred while fetching doctors");
@@ -178,43 +207,60 @@ const PatientForm = () => {
   };
 
   const onSubmit = async (data) => {
-  const token = localStorage.getItem('user:token');
-  const updatedData = { ...data, email: email };
+    const token = localStorage.getItem('user:token');
+    const updatedData = {
+      ...data, email: email,
+      prescribedMeds: meds.filter(
+        (med) =>
+          med.medicineName || med.medicineType || med.price || med.quantity || med.totalPrice
+      )
+    };
 
-  try {
-    const url = FormId
-      ? `http://localhost:5000/record/patient/${FormId}` 
-      : `http://localhost:5000/record/patient`;          
+    try {
+      const url = FormId
+        ? `http://localhost:5000/record/patient/${FormId}`
+        : `http://localhost:5000/record/patient`;
 
-    const method = FormId ? "PUT" : "POST";
+      const method = FormId ? "PUT" : "POST";
 
-    const res = await fetch(url, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedData),
-    });
+      const res = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      });
 
-    const resText = await res.text();
-    const resData = resText ? JSON.parse(resText) : {};
+      const resText = await res.text();
+      const resData = resText ? JSON.parse(resText) : {};
 
-    if (res.status === 400) {
-      toast.error("Invalid input");
-    } else if (res.status === 201 || res.status === 204 || res.status === 200) {
-      toast.success(FormId ? "Patient Record Updated!" : "Patient Record Added!");
-      reset();
-      navigate("/form");
-    } else {
-      toast.error(resData.message || "Unexpected server response");
+      if (res.status === 400) {
+        toast.error("Invalid input");
+      } else if (res.status === 201 || res.status === 204 || res.status === 200) {
+
+        reset();
+        if (FormId) {
+          toast.success("Patient Record Updated!");
+          setTimeout(() => {
+            navigate("/");
+          }, 1000);
+        } else {
+          toast.success("Patient Record Added!");
+          setTimeout(() => {
+            navigate("/form");
+          }, 500);
+        }
+
+      } else {
+        toast.error(resData.message || "Unexpected server response");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("An error occurred");
     }
-  } catch (error) {
-    console.error("Error:", error);
-    toast.error("An error occurred");
-  }
-};
+  };
 
-  
+
 
 
   return (
@@ -262,7 +308,7 @@ const PatientForm = () => {
                 {...register("patientId", { required: "Patient Id is required" })}
                 className={`mt-1 w-full  ${isDoc ? `border-none focus:border` : `border`} rounded-md p-2 `}
               />
-                            {errors.patientId && <p className="text-red-500 text-sm">{errors.patientId.message}</p>}
+              {errors.patientId && <p className="text-red-500 text-sm">{errors.patientId.message}</p>}
 
 
             </div>
@@ -277,7 +323,7 @@ const PatientForm = () => {
                 {...register("patientName", { required: "Patient name is required" })}
                 className="mt-1 w-full border rounded-md p-2"
               />
-                            {errors.patientName && <p className="text-red-500 text-sm">{errors.patientName.message}</p>}
+              {errors.patientName && <p className="text-red-500 text-sm">{errors.patientName.message}</p>}
 
             </div>
             <div className="w-1/2">
@@ -353,7 +399,7 @@ const PatientForm = () => {
                 <option>Hepatologist</option>
                 <option>Nephrologist</option>
               </select>
-                            {errors.reason && <p className="text-red-500 text-sm">{errors.reason.message}</p>}
+              {errors.reason && <p className="text-red-500 text-sm">{errors.reason.message}</p>}
             </div>
 
           </div>
@@ -400,12 +446,15 @@ const PatientForm = () => {
           />
 
           {isDoc && (<div><label className="block text-sm font-medium text-[var(--text-primary)]">Doctor's suggestion </label>
-        <textarea type="datetime-local" {...register("description")} className="mt-1 w-full border rounded-md p-2"/>
+            <textarea type="datetime-local" {...register("description")} className="mt-1 w-full border rounded-md p-2" />
 
 
-      </div>)}
+          </div>)}
 
+          {isDoc && (<div className="py-5">
+            <PrescribedMeds rows={meds} setRows={setMeds} setMedRecord={setMedRecord} />
 
+          </div>)}
 
           {/* Submit */}
           <div className=" pt-8 flex gap-3 items-center justify-center">
@@ -424,7 +473,9 @@ const PatientForm = () => {
             </button>
           </div>
         </form>
-              <ToastContainer position="top-center" autoClose={1500} />
+
+
+        <ToastContainer position="top-center" autoClose={1500} />
       </div>
     </Layout>
   )
