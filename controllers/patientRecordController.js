@@ -1,4 +1,4 @@
-const { addPatientRecord, getPatientRecord, todaysPatientRecord , getSinglePatientRecord, updatePatientRecord} = require('../models/patientRecordModel');
+const { addPatientRecord, insertMedicine, getPatientRecord, todaysPatientRecord , getSinglePatientRecord, updatePatientRecord} = require('../models/patientRecordModel');
 
 const updatePatient = async (req, res) => {
   const FormId = parseInt(req.params.FormId, 10);
@@ -20,7 +20,8 @@ const updatePatient = async (req, res) => {
     reason, 
     date,
     email, 
-    description
+    description,
+    prescribedMeds = []
   } = req.body;
 
   try {
@@ -41,6 +42,10 @@ const updatePatient = async (req, res) => {
       description
     );
 
+    if (prescribedMeds.length > 0) {
+      await insertMedicine(FormId, prescribedMeds);
+    }
+
     res.status(200).json({ message: "Patient record updated successfully" });
   } catch (error) {
     console.error("Error updating patient record:", error);
@@ -51,7 +56,8 @@ const updatePatient = async (req, res) => {
 const registerPatient = async (req, res) => {
   try {
     const {
-      patientId, patientName, gender, age, address, phone, doctorId, doctorName, symptoms, reason, date, email
+      patientId, patientName, gender, age, address, phone, doctorId, doctorName, symptoms, reason, date, email,
+      prescribedMeds = []
     } = req.body;
 
     if (!patientId || !patientName || !gender || !age || !phone || !doctorId || !reason) {
@@ -61,6 +67,11 @@ const registerPatient = async (req, res) => {
     await addPatientRecord(
         patientId, patientName, gender, age, address, phone, doctorId, doctorName, symptoms, reason, date, email
     );
+
+  
+    if (prescribedMeds.length > 0) {
+      await insertMedicine(formId, prescribedMeds);
+    }
 
     res.status(201).json({ message: 'Patient record added successfully.' });
   } catch (error) {

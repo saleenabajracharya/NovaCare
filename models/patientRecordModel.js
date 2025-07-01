@@ -39,7 +39,7 @@ const updatePatientRecord = async (
        date = $11,
        email = $12,
        description = $13,
-       "modified_Date" = CURRENT_TIMESTAMP
+       "modified_Date" = CURRENT_DATE
      WHERE "FormId" = $14 AND "deleted_Date" IS NULL`,
     [
       patientId,
@@ -60,22 +60,103 @@ const updatePatientRecord = async (
   );
 };
 
+const insertMedicine = async (formId, meds) => {
+  await db.query(`DELETE FROM "MedicineRecord" WHERE record_id = $1`, [formId]);
+
+  for (const med of meds) {
+    const values = [
+      med.medicineName,
+      med.medicineType,
+      med.price === "" ? null : Number(med.price),
+      med.quantity === "" ? null : Number(med.quantity),
+      med.totalPrice === "" ? null : Number(med.totalPrice),
+      formId,
+    ];
+
+    await db.query(
+      `INSERT INTO "MedicineRecord"
+       (medicine_name, medicine_type, price, quantity, total_price, record_id, "created_Date")
+       VALUES ($1, $2, $3, $4, $5, $6, CURRENT_DATE)`,
+      values
+    );
+  }
+};
 
 
-const getPatientRecord = async () =>{
-  const result = await db.query('SELECT * FROM PatientRecord WHERE "deleted_Date" IS NULL order by "created_Date" DESC');
+
+const getPatientRecord = async () => {
+  const result = await db.query(`
+    SELECT 
+      pr.*, 
+      COALESCE(
+        json_agg(
+          json_build_object(
+            'id', mr.id,
+            'medicineName', mr.medicine_name,
+            'medicineType', mr.medicine_type,
+            'price', mr.price,
+            'quantity', mr.quantity,
+            'totalPrice', mr.total_price
+          )
+        ) FILTER (WHERE mr."deleted_Date" IS NULL),
+        '[]'
+      ) AS prescribedMeds
+    FROM "patientrecord" pr
+    LEFT JOIN "MedicineRecord" mr ON pr."FormId" = mr.record_id
+    WHERE pr."deleted_Date" IS NULL
+    GROUP BY pr."FormId"
+    ORDER BY pr."created_Date" DESC;
+  `);
+
   return result.rows;
-}
+};
+
 
 const todaysPatientRecord = async (reason) =>{
-  const result = await db.query('SELECT * FROM PatientRecord WHERE "deleted_Date" IS NULL AND "department" = $1 AND "date" = CURRENT_DATE order by "date" ASC', [reason]);
+  const result = await db.query(`SELECT 
+      pr.*, 
+      COALESCE(
+        json_agg(
+          json_build_object(
+            'id', mr.id,
+            'medicineName', mr.medicine_name,
+            'medicineType', mr.medicine_type,
+            'price', mr.price,
+            'quantity', mr.quantity,
+            'totalPrice', mr.total_price
+          )
+        ) FILTER (WHERE mr."deleted_Date" IS NULL),
+        '[]'
+      ) AS prescribedMeds
+    FROM "patientrecord" pr
+    LEFT JOIN "MedicineRecord" mr ON pr."FormId" = mr.record_id
+    WHERE pr."deleted_Date" IS NULL AND
+    pr."department" = $1 AND DATE(pr."created_Date" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kathmandu') = CURRENT_DATE GROUP BY pr."FormId"  order by "created_Date" ASC`, [reason]);
   return result.rows;
 }
 
 const getSinglePatientRecord = async (FormId) =>{
-  const result = await db.query('SELECT * FROM PatientRecord WHERE "deleted_Date" IS NULL AND "FormId" = $1',[FormId]);
+  const result = await db.query(`SELECT 
+      pr.*, 
+      COALESCE(
+        json_agg(
+          json_build_object(
+            'id', mr.id,
+            'medicineName', mr.medicine_name,
+            'medicineType', mr.medicine_type,
+            'price', mr.price,
+            'quantity', mr.quantity,
+            'totalPrice', mr.total_price
+          )
+        ) FILTER (WHERE mr."deleted_Date" IS NULL),
+        '[]'
+      ) AS prescribedMeds
+    FROM "patientrecord" pr
+    LEFT JOIN "MedicineRecord" mr ON pr."FormId" = mr.record_id
+    WHERE pr."deleted_Date" IS NULL AND "FormId" = $1
+    GROUP BY pr."FormId"`,[FormId]);
   return result.rows[0];
 }
 module.exports = {
-  addPatientRecord, getPatientRecord, todaysPatientRecord, getSinglePatientRecord, updatePatientRecord
+  addPatientRecord, getPatientRecord, todaysPatientRecord, getSinglePatientRecord, updatePatientRecord, insertMedicine
 };
