@@ -1,4 +1,4 @@
-const { addPatientRecord, insertMedicine, getPatientRecord, todaysPatientRecord , getSinglePatientRecord, updatePatientRecord} = require('../models/patientRecordModel');
+const { addPatientRecord, insertMedicine, getPatientRecord, todaysPatientRecord , removePatient, removePatients, getSinglePatientRecord, updatePatientRecord} = require('../models/patientRecordModel');
 
 const updatePatient = async (req, res) => {
   const FormId = parseInt(req.params.FormId, 10);
@@ -120,7 +120,36 @@ const getSinglePatient = async (req, res) =>{
   }
 }
 
+const removePatientData = async (req, res) => {
+  const FormId = req.params.FormId;
+  if (isNaN(FormId)) {
+    return res.status(400).json({ message: "Invalid User ID" });
+
+  } 
+  try{
+    await removePatient(FormId);
+    res.status(200).json({ message: "Patient removed successfully" }); }
+    catch (error) {
+    console.error("Error removing patient record:", error);
+    res.status(500).json({ message: "Failed to remove patient record" });
+  }
+      
+}
+
+const removeAllUserData = async (req, res) => {
+
+  try{
+    await removePatients();
+    res.status(200).json({ message: "Patients removed successfully" }); }
+    catch (error) {
+    console.error("Error removing patients record:", error);
+    res.status(500).json({ message: "Failed to remove users record" });
+  }
+      
+}
+
 
 module.exports = {
-  registerPatient, getPatientData, todaysPatientData, getSinglePatient, updatePatient
+  registerPatient, getPatientData, todaysPatientData, getSinglePatient, updatePatient,
+  removePatientData, removeAllUserData
 };

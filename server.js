@@ -13,9 +13,11 @@ app.use(cors());
 const authRoutes = require('./routes/authRoute');
 const patientRecordRoutes = require('./routes/patientRecordRoute');
 const doctorsRoutes = require('./routes/doctorRoute');
+const userRoutes = require('./routes/userRoute');
 const authenticate = require('./middlewares/authMiddleware');
 
 app.use('/data', doctorsRoutes);
+app.use('/data', userRoutes);
 app.use('/record', patientRecordRoutes);
 app.use('/api',authRoutes);
 

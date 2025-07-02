@@ -157,6 +157,34 @@ const getSinglePatientRecord = async (FormId) =>{
     GROUP BY pr."FormId"`,[FormId]);
   return result.rows[0];
 }
+
+const removePatient = async (
+  FormId
+) => {
+  await db.query(
+    `UPDATE patientrecord
+     SET
+       "deleted_Date" = CURRENT_DATE
+     WHERE "FormId" = $1 AND "deleted_Date" IS NULL
+`,
+    [
+      FormId
+    ]
+  );
+};
+
+const removePatients = async (
+) => {
+  await db.query(
+    `UPDATE patientrecord
+     SET
+       "deleted_Date" = CURRENT_DATE
+     WHERE "deleted_Date" IS NULL
+`,
+  );
+};
+
 module.exports = {
-  addPatientRecord, getPatientRecord, todaysPatientRecord, getSinglePatientRecord, updatePatientRecord, insertMedicine
+  addPatientRecord, getPatientRecord, todaysPatientRecord, getSinglePatientRecord, updatePatientRecord, insertMedicine,
+  removePatient, removePatients
 };
