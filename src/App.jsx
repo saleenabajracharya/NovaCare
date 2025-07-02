@@ -11,7 +11,8 @@ import { lazy, Suspense } from 'react';
 const PatientHistory = lazy(() => import('./components/modules/patientHistory'));
 const TodaysList = lazy(() => import('./components/modules/TodaysList'));
 const Dashboard = lazy(() => import('./components/modules/Dashboard'))
-
+const Users = lazy(() => import('./components/modules/Users'))
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 function parseJwt(token) {
   if (!token) return null;
@@ -126,6 +127,14 @@ function App() {
                 Loading...
               </div>}>
               <TodaysList />
+            </Suspense>
+          } />
+          <Route path='/users' element={
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-screen text-xl font-semibold text-[var(--primary-color)]">
+                Loading...
+              </div>}>
+              <Users />
             </Suspense>
           } />
 

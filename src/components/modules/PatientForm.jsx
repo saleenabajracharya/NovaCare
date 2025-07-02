@@ -8,6 +8,8 @@ import { toast, ToastContainer } from "react-toastify";
 import { useParams } from "react-router";
 import { useLocation } from "react-router-dom";
 import PrescribedMeds from "./PrescribedMeds";
+import { confirmAlert } from 'react-confirm-alert';
+
 const getToday = () => new Date().toISOString().split("T")[0];
 const PatientForm = () => {
   const {
@@ -52,6 +54,7 @@ const PatientForm = () => {
 
   useEffect(() => {
     if (FormId) {
+      debugger;
       const fetchPatientData = async () => {
         try {
           const res = await fetch(`http://localhost:5000/record/patient/${FormId}`, {
@@ -92,7 +95,7 @@ const PatientForm = () => {
           if (data.doctor_name) {
             setTimeout(() => {
               setValue("doctorName", data.doctor_name);
-            }, 50);
+            }, 500);
           }
           if (data.prescribedmeds && Array.isArray(data.prescribedmeds)) {
             const medRows = data.prescribedmeds.map(med => ({
@@ -118,7 +121,43 @@ const PatientForm = () => {
     }
   }, [FormId, setValue]);
 
-
+   const handleDelete = (FormId) => {
+      confirmAlert({
+        title: 'Confirm Deletion',
+        message: 'Are you sure you want to delete this data?',
+        buttons: [
+          {
+            label: 'Yes',
+            className: 'bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700',
+            onClick: async () => {
+              try {
+                const res = await fetch(`http://localhost:5000/record/patients/${FormId}`, {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+  
+                });
+  
+                if (res.ok) {
+                  toast.success('Patient record deleted successfully!');
+                  navigate("/todays-list");                
+                } else {
+                  toast.error('Failed to delete record');
+                }
+              } catch (error) {
+                console.error('Error deleting record:', error);
+              }
+            }
+          },
+          {
+            label: 'No',
+            className: 'bg-[var(--primary-color))] text-white px-4 py-2 rounded hover:bg-blue-200',
+            onClick: () => { }
+          }
+        ]
+      });
+    };
 
   const newPatient = () => {
     const date = new Date();
@@ -464,13 +503,23 @@ const PatientForm = () => {
             >
               Save
             </button>
+
+            {FormId ? (
+              <button
+                type="button"
+                onClick={() => handleDelete(FormId)}
+                className="px-6 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-600"
+              >
+                Delete
+              </button>) : 
+              (
             <button
               type="button"
               onClick={handleCancel}
               className="px-6 py-2 bg-gray-300 text-[var(--text-primary)] font-semibold rounded hover:bg-gray-400"
             >
               Cancel
-            </button>
+            </button>)}
           </div>
         </form>
 

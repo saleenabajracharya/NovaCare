@@ -64,7 +64,7 @@ const TodaysList = () => {
               className="p-4 cursor-pointer bg-[var(--background-color)] hover:bg-blue-100 flex justify-between items-center"
             >
               <span className="font-medium">
-                {formatDateNepal(entry.date)} - {entry.patientname} - {entry.phone}
+                {entry.created_Date ? formatDateNepal(entry.created_Date) : "N/A"}- {entry.patientname} - {entry.phone}
               </span>
             </div>
           </div>

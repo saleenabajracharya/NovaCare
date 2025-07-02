@@ -26,3 +26,7 @@ input:focus, select:focus {
   box-shadow: none !important;
   border-color: var(--button-color) !important;
 }
+
+.react-confirm-alert-overlay {
+  background: transparent !important;
+}

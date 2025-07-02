@@ -1,10 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { Layout } from "../layout/Layout";
 import { FaCaretDown, FaCaretUp } from "react-icons/fa";
+import { RxCross2 } from "react-icons/rx";
+import { confirmAlert } from 'react-confirm-alert';
+import { toast , ToastContainer} from 'react-toastify';
+
+const NEPAL_OFFSET_MINUTES = 5 * 60 + 45; // 345 minutes
+
+const formatDateNepal = (dateString) => {
+  if (!dateString) return "N/A";
+
+  // Parse date string into JS Date object (assumed to be UTC)
+  const date = new Date(dateString);
+
+  // Adjust date by Nepal timezone offset
+  const nepalDate = new Date(date.getTime() + NEPAL_OFFSET_MINUTES * 60000);
+
+  // Return YYYY-MM-DD format
+  return nepalDate.toISOString().slice(0, 10);
+};
 
 const PatientHistory = () => {
   const [openId, setOpenId] = useState(null);
   const [patientRecord, setPatientRecord] = useState([]);
+
 
   useEffect(() => {
     const fetchPatientHistory = async () => {
@@ -29,8 +48,46 @@ const PatientHistory = () => {
     fetchPatientHistory();
   }, []);
 
-  const toggleDetails = (patientId) => {
-    setOpenId(openId === patientId ? null : patientId);
+  const toggleDetails = (FormId) => {
+    setOpenId(openId === FormId ? null : FormId);
+  };
+
+  const handleDelete = (FormId) => {
+    confirmAlert({
+      title: 'Confirm Deletion',
+      message: 'Are you sure you want to delete this data?',
+      buttons: [
+        {
+          label: 'Yes',
+          className: 'bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700',
+          onClick: async () => {
+            try {
+              const res = await fetch(`http://localhost:5000/record/patients/${FormId}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+
+              });
+
+              if (res.ok) {
+                toast.success('Patient record deleted successfully!');
+                setPatientRecord(prevUsers => prevUsers.filter(user => user.FormId !== FormId));
+              } else {
+                toast.error('Failed to delete record');
+              }
+            } catch (error) {
+              console.error('Error deleting record:', error);
+            }
+          }
+        },
+        {
+          label: 'No',
+          className: 'bg-[var(--primary-color))] text-white px-4 py-2 rounded hover:bg-blue-200',
+          onClick: () => { }
+        }
+      ]
+    });
   };
 
   return (
@@ -41,18 +98,18 @@ const PatientHistory = () => {
         {patientRecord.map((entry) => (
           <div key={entry.FormId} className="border rounded-md mb-4 shadow-sm transition-all">
             <div
-              onClick={() => toggleDetails(entry.patientid)}
+              onClick={() => toggleDetails(entry.FormId)}
               className="p-4 cursor-pointer bg-[var(--background-color)] hover:bg-blue-100 flex justify-between items-center"
             >
               <span className="font-medium">
-                {entry.date?.slice(0, 10) || "N/A"} - {entry.patientname} - {entry.phone}
+                {entry.date ? formatDateNepal(entry.date) : "N/A"}- {entry.patientname} - {entry.phone}
               </span>
               <span className="text-[var(--primary-color)]">
-                {openId === entry.patientid ? <FaCaretUp size={26} /> : <FaCaretDown size={26} />}
+                {openId === entry.FormId ? <RxCross2 size={26} onClick={() => handleDelete(entry.FormId)} /> : <FaCaretDown size={26} />}
               </span>
             </div>
 
-            {openId === entry.patientid && (
+            {openId === entry.FormId && (
               <div className="p-4 bg-gray-50">
                 <div className="flex flex-wrap gap-4">
                   <div className="w-full md:w-[48%]">
@@ -142,6 +199,8 @@ const PatientHistory = () => {
             )}
           </div>
         ))}
+        <ToastContainer position="top-center" autoClose={1500} />
+
       </div>
     </Layout>
   );

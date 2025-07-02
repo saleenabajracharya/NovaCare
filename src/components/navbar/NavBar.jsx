@@ -2,6 +2,7 @@ import React, {useState} from 'react'
 import { FiSearch } from "react-icons/fi";
 import { useNavigate, Link } from 'react-router-dom';
 import { FaUser } from "react-icons/fa";
+import { IoIosLogOut } from "react-icons/io";
 
 
 export const NavBar = () => {
@@ -37,20 +38,26 @@ export const NavBar = () => {
     </form>
 
     <div className="relative me-10 text-[var(--primary-color)] cursor-pointer transition-all duration-300 hover:border-[#085a9d] hover:scale-110">
-    <FaUser size={30} onClick={() => setShowUser(!showUser)}/>
+    <FaUser size={25} onClick={() => setShowUser(!showUser)}/>
 
     </div>
   </nav>
   {showUser && (
-        <div className="absolute top-18 right-12 bg-white border border-gray-300 rounded shadow-md py-2 w-40 z-50 text-center">
+        <div className="fixed top-18 right-12 bg-white border border-gray-300 rounded shadow-md py-2 w-40 z-50 text-center">
           <div
-            className=" py-2 hover:bg-gray-100 cursor-pointer text-[var( --text-primary)]" onClick={() => navigate('/profile')}
+            className=" py-1 hover:bg-gray-100 cursor-pointer text-[var( --text-primary)]" onClick={() => navigate('/profile')}
           >
             Profile
           </div>
           <hr className='text-gray-300'/>
           <div
-            className=" py-2 hover:bg-gray-100 cursor-pointer text-[var( --text-primary)]" onClick={logout}
+            className=" py-1 hover:bg-gray-100 cursor-pointer text-[var( --text-primary)]" onClick={() => navigate('/users')} 
+          >
+            Users
+          </div>
+          <hr className='text-gray-300'/>
+          <div
+            className=" py-1 hover:bg-gray-100 cursor-pointer text-[var( --text-primary)]" onClick={logout}
           >
             Logout
           </div>

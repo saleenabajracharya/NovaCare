@@ -24,7 +24,8 @@ const PrescribedMeds = ({ rows, setRows }) => {
   return (
     <div className="p-4 bg-white rounded shadow">
       <h2 className="text-lg font-bold text-center text-[var(--text-primary)] mb-4">Medicines</h2>
-      <table className="w-full border-collapse border border-gray-300">
+           <div className="overflow-x-auto md:overflow-x-scroll lg:overflow-x-scroll">
+  <table className="w-full border-collapse border border-gray-300 min-w-[600px]">
         <thead className="bg-gray-100">
           <tr>
             <th className="border p-2">S.N.</th>
@@ -91,6 +92,7 @@ const PrescribedMeds = ({ rows, setRows }) => {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };
