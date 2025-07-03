@@ -13,7 +13,8 @@ const TodaysList = lazy(() => import('./components/modules/TodaysList'));
 const Dashboard = lazy(() => import('./components/modules/Dashboard'))
 const Users = lazy(() => import('./components/modules/Users'))
 import 'react-confirm-alert/src/react-confirm-alert.css';
-
+import { Provider } from 'react-redux';
+import store from './redux/store';
 function parseJwt(token) {
   if (!token) return null;
   try {
@@ -75,6 +76,7 @@ function App() {
   };
 
   return (
+     <Provider store={store}>
       <BrowserRouter>
         <Routes>
           <Route
@@ -158,6 +160,7 @@ function App() {
           <Route path="/form/:FormId" element={<PatientForm />} />
         </Routes>
       </BrowserRouter>
+      </Provider>
   )
 }
 

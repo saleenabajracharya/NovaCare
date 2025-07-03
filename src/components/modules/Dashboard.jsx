@@ -8,9 +8,13 @@ const Dashboard = () => {
 
   const user = JSON.parse(localStorage.getItem('user:detail') || '{}');
   const isDoc = user?.role === "doctor";
+  const isPharma = user?.role === "pharma" ;
   const fullName = user.fullName || "User";
 
-
+  const handleMainAction = () => {
+  if (isDoc || isPharma) navigate('/todays-list');
+  else navigate('/form');
+  };
   const navigate = useNavigate();
   return (
     <Layout>
@@ -24,11 +28,11 @@ const Dashboard = () => {
         </div>
         <div className='flex mx-12'>
           <div className='h-30 w-25 bg-[var(--background-color)] rounded-lg m-4 border border-gray-300 cursor-pointer transition-all duration-300 hover:border-gray-400 hover:shadow-2xl'>
-            <div className='flex justify-center items-center py-8 text-[var(--primary-color)] ' onClick={isDoc ? () => navigate('/todays-list') : () => navigate('/form')}
+            <div className='flex justify-center items-center py-8 text-[var(--primary-color)] ' onClick={handleMainAction}
             >
               <FaFilePen size={50} aria-label="New Form"/>
             </div>
-            <p className='text-center my-2  text-sm'>{isDoc ? "Today's List" : "New Form"}</p>
+            <p className='text-center my-2  text-sm'>{(isDoc || isPharma) ? "Today's List" : "New Form"}</p>
           </div>
 
           <div className='h-30 w-25 bg-[var(--background-color)] rounded-lg m-4 border border-gray-300 cursor-pointer transition-all duration-300 hover:border-gray-400 hover:shadow-2xl'>

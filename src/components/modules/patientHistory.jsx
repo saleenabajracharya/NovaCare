@@ -4,6 +4,7 @@ import { FaCaretDown, FaCaretUp } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
 import { confirmAlert } from 'react-confirm-alert';
 import { toast , ToastContainer} from 'react-toastify';
+import { useSelector } from "react-redux";
 
 const NEPAL_OFFSET_MINUTES = 5 * 60 + 45; // 345 minutes
 
@@ -23,6 +24,8 @@ const formatDateNepal = (dateString) => {
 const PatientHistory = () => {
   const [openId, setOpenId] = useState(null);
   const [patientRecord, setPatientRecord] = useState([]);
+  const searchQuery = useSelector((state) => state.search.query);
+
 
 
   useEffect(() => {
@@ -90,19 +93,30 @@ const PatientHistory = () => {
     });
   };
 
+  // Case-insensitive filter
+const filteredRecords = patientRecord.filter((entry) => {
+  const lowerQuery = searchQuery.toLowerCase();
+  return (
+    entry.patientname?.toLowerCase().includes(lowerQuery) ||
+    entry.patientid?.toString().toLowerCase().includes(lowerQuery) ||
+    entry.phone?.toString().toLowerCase().includes(lowerQuery)
+  );
+});
+
+
   return (
     <Layout>
       <div className="min-h-[calc(100vh-140px)] w-4/5 mx-auto rounded-xl p-5 bg-white py-5">
         <h2 className="text-2xl text-center font-bold text-[var(--text-primary)] mb-6 mt-5">Patient History</h2>
 
-        {patientRecord.map((entry) => (
+        {filteredRecords.map((entry) => (
           <div key={entry.FormId} className="border rounded-md mb-4 shadow-sm transition-all">
             <div
               onClick={() => toggleDetails(entry.FormId)}
               className="p-4 cursor-pointer bg-[var(--background-color)] hover:bg-blue-100 flex justify-between items-center"
             >
               <span className="font-medium">
-                {entry.date ? formatDateNepal(entry.date) : "N/A"}- {entry.patientname} - {entry.phone}
+                {entry.created_Date ? formatDateNepal(entry.created_Date) : "N/A"}- {entry.patientname} - {entry.phone}
               </span>
               <span className="text-[var(--primary-color)]">
                 {openId === entry.FormId ? <RxCross2 size={26} onClick={() => handleDelete(entry.FormId)} /> : <FaCaretDown size={26} />}

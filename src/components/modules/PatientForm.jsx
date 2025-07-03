@@ -2,7 +2,7 @@ import { Layout } from "../layout/Layout"
 import { useForm } from "react-hook-form"
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { toast, ToastContainer } from "react-toastify";
 import { useParams } from "react-router";
@@ -34,6 +34,7 @@ const PatientForm = () => {
 
   const user = JSON.parse(localStorage.getItem('user:detail') || '{}');
   const isDoc = user?.role === "doctor";
+  const isPharma = user?.role === "pharma" ;
   const email = user.email || "User";
   const { FormId } = useParams();
 
@@ -95,7 +96,7 @@ const PatientForm = () => {
           if (data.doctor_name) {
             setTimeout(() => {
               setValue("doctorName", data.doctor_name);
-            }, 500);
+            }, 50);
           }
           if (data.prescribedmeds && Array.isArray(data.prescribedmeds)) {
             const medRows = data.prescribedmeds.map(med => ({
@@ -281,7 +282,7 @@ const PatientForm = () => {
         if (FormId) {
           toast.success("Patient Record Updated!");
           setTimeout(() => {
-            navigate("/");
+            navigate("/todays-list");
           }, 1000);
         } else {
           toast.success("Patient Record Added!");
@@ -484,13 +485,13 @@ const PatientForm = () => {
             className="mt-1 w-full border rounded-md p-2 text-sm text-black bg-gray-100"
           />
 
-          {isDoc && (<div><label className="block text-sm font-medium text-[var(--text-primary)]">Doctor's suggestion </label>
+          {(isDoc || isPharma) && (<div><label className="block text-sm font-medium text-[var(--text-primary)]">Doctor's suggestion </label>
             <textarea type="datetime-local" {...register("description")} className="mt-1 w-full border rounded-md p-2" />
 
 
           </div>)}
 
-          {isDoc && (<div className="py-5">
+          {(isDoc || isPharma)&& (<div className="py-5">
             <PrescribedMeds rows={meds} setRows={setMeds} setMedRecord={setMedRecord} />
 
           </div>)}

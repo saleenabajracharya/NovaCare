@@ -146,7 +146,7 @@ const onSubmit = async (data) => {
                   >
                     <option value="doctor">Doctor</option>
                     <option value="staff">Front Desk Staff</option>
-                    <option value="staff">Pharmacist</option>
+                    <option value="pharma">Pharmacist</option>
                   </select>
                 </div>
               )}
