@@ -112,8 +112,9 @@ const getPatientRecord = async () => {
 };
 
 
-const todaysPatientRecord = async (reason) =>{
-  const result = await db.query(`SELECT 
+const todaysPatientRecord = async (reason, role) => {
+  let query = `
+    SELECT 
       pr.*, 
       COALESCE(
         json_agg(
@@ -130,10 +131,30 @@ const todaysPatientRecord = async (reason) =>{
       ) AS prescribedMeds
     FROM "patientrecord" pr
     LEFT JOIN "MedicineRecord" mr ON pr."FormId" = mr.record_id
-    WHERE pr."deleted_Date" IS NULL AND
-    pr."department" = $1 AND DATE(pr."created_Date" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kathmandu') = CURRENT_DATE GROUP BY pr."FormId"  order by "created_Date" ASC`, [reason]);
+    WHERE pr."deleted_Date" IS NULL
+      AND DATE(pr."created_Date" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kathmandu') = CURRENT_DATE
+  `;
+
+  const values = [];
+
+  if (role !== 'pharma') {
+    query += ` AND pr."department" = $1`;
+    values.push(reason);
+  }
+
+  query += ` GROUP BY pr."FormId" ORDER BY "created_Date" ASC`;
+
+  const result = await db.query(query, values);
+
+  if (role === 'pharma') {
+    return result.rows.map(row => ({
+      ...row,
+      department: null 
+    }));
+  }
+
   return result.rows;
-}
+};
 
 const getSinglePatientRecord = async (FormId) =>{
   const result = await db.query(`SELECT 
@@ -183,6 +204,8 @@ const removePatients = async (
 `,
   );
 };
+
+
 
 module.exports = {
   addPatientRecord, getPatientRecord, todaysPatientRecord, getSinglePatientRecord, updatePatientRecord, insertMedicine,

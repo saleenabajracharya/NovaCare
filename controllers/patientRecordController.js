@@ -92,11 +92,11 @@ const getPatientData = async (req, res) =>{
 
 const todaysPatientData = async(req,res) => {
   try{
-  const { department } = req.query;
+  const { department, role } = req.query;
   if (!department) {
       return res.status(400).json({ message: 'Department Name is required' });
     }
-    const patients = await todaysPatientRecord(department);
+    const patients = await todaysPatientRecord(department, role);
     res.status(200).json(patients);
   } catch (error) {
     console.error('Error fetching patients:', error);
