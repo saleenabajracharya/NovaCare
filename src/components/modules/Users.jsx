@@ -130,6 +130,7 @@ const Users = () => {
                 },
                 body: JSON.stringify({
                     fullname: user.fullname,
+                    phone: user.phone,
                     email: user.email,
                     role: user.role,
                     department: user.department,
@@ -180,6 +181,7 @@ const Users = () => {
                                 <th className="border border-gray-400 text-[var(--primary-color)] p-2">Email</th>
                                 <th className="border border-gray-400 text-[var(--primary-color)] p-2">Role</th>
                                 <th className="border border-gray-400 text-[var(--primary-color)] p-2">Department</th>
+                                <th className="border border-gray-400 text-[var(--primary-color)] p-2">Phone</th>
                                 <th className="border border-gray-400 text-[var(--primary-color)] p-2">Action</th>
 
 
@@ -218,6 +220,14 @@ const Users = () => {
                                             type="text"
                                             value={user.department}
                                             onChange={(e) => handleChange(index, 'department', e.target.value)}
+                                            className="w-full p-1  rounded"
+                                        />
+                                    </td>
+                                    <td className="border border-gray-400 p-2">
+                                        <input
+                                            type="text"
+                                            value={user.phone}
+                                            onChange={(e) => handleChange(index, 'phone', e.target.value)}
                                             className="w-full p-1  rounded"
                                         />
                                     </td>
