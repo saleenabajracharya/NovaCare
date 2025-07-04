@@ -30,6 +30,7 @@ const getSingleUsers = async (UserId) =>{
 const updateUser = async (
   UserId,
   fullname,
+  phone,
   email,
   role,
   department,
@@ -39,15 +40,17 @@ const updateUser = async (
     `UPDATE users
      SET
        fullname = $1,
-       email = $2,
-       role = $3,
-       department = $4,
-       "modified_User" = $5,
+       phone = $2,
+       email = $3,
+       role = $4,
+       department = $5,
+       "modified_User" = $6,
        "modified_Date" = CURRENT_DATE
-     WHERE "UserId" = $6 AND "deleted_Date" IS NULL
+     WHERE "UserId" = $7 AND "deleted_Date" IS NULL
 `,
     [
       fullname,
+      phone,
       email,
       role,
       department,

@@ -33,7 +33,7 @@ const updateUserData = async (req, res) => {
     return res.status(400).json({ message: "Invalid User ID" });
   }
 
-  const { fullname, email, role, department, modifiedBy } = req.body;
+  const { fullname, phone, email, role, department, modifiedBy } = req.body;
 
   try {
     const existingUser = await getSingleUsers(UserId);
@@ -44,6 +44,7 @@ const updateUserData = async (req, res) => {
     await updateUser(
       UserId,
       fullname ?? existingUser.fullname,
+      phone ?? existingUser.phone,
       email ?? existingUser.email,
       role ?? existingUser.role,
       department ?? existingUser.department,
